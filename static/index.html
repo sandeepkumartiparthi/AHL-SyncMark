@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AHL-SyncMark & FAMA-D Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="dashboard-container">
+
+        <header class="glass-card header-card">
+            <div class="header-logo">
+                <i class="fa-solid fa-shield-halved logo-icon"></i>
+                <div class="logo-text">
+                    <h1>AHL-SyncMark</h1>
+                    <span class="subtitle">DNN Ownership Verification & FAMA-D Sandbox</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button id="btn-run" class="btn btn-primary">
+                    <i class="fa-solid fa-play"></i> Start Pipeline
+                </button>
+                <div class="pipeline-status">
+                    <span id="status-badge" class="badge badge-idle">Idle</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="glass-card progress-card" id="progress-container" style="display: none;">
+            <div class="progress-info">
+                <span>Executing Pipeline Tasks...</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar-outer">
+                <div class="progress-bar-inner" id="progress-bar" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <main class="dashboard-grid">
+
+            <div class="grid-col col-left">
+                
+                <div class="glass-card info-card">
+                    <h2><i class="fa-solid fa-circle-info text-cyan"></i> Protocol Mechanics</h2>
+                    <p>
+                        AHL-SyncMark secures neural network IP with <strong>0% accuracy degradation</strong> by routing ownership verification through intermediate activation layers under gradient isolation.
+                    </p>
+                    <div class="mechanics-list">
+                        <div class="mechanic-item">
+                            <span class="m-dot dot-cyan"></span>
+                            <div><strong>Fisher Info Ranking:</strong> Hooks to high-curvature nodes.</div>
+                        </div>
+                        <div class="mechanic-item">
+                            <span class="m-dot dot-purple"></span>
+                            <div><strong>Chaotic Space Keying:</strong> CSK scrambling hides channels via Henon map.</div>
+                        </div>
+                        <div class="mechanic-item">
+                            <span class="m-dot dot-green"></span>
+                            <div><strong>CLADA Distillation:</strong> Soft-label anchors student models.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card stress-card">
+                    <h2><i class="fa-solid fa-flask text-pink"></i> Interactive Stress Testing</h2>
+                    <div class="test-controls" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label for="stress-attack-type" style="font-size: 13px; color: var(--text-muted);">Attack Type:</label>
+                            <select id="stress-attack-type" class="dropdown">
+                                <option value="prune">Structured Pruning</option>
+                                <option value="quantize">Weight Quantization</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label id="stress-param-label" for="stress-param" style="font-size: 13px; color: var(--text-muted);">Ratio:</label>
+                            <div style="display: flex; align-items: center; gap: 10px; width: 60%;">
+                                <input type="range" id="stress-param" min="0.0" max="0.95" step="0.05" value="0.50" style="width: 100%;">
+                                <span id="stress-param-val" style="font-size: 13px; font-weight: 600; width: 40px; text-align: right;">0.50</span>
+                            </div>
+                        </div>
+                        <button id="btn-apply-stress" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 6px;">
+                            <i class="fa-solid fa-bolt"></i> Apply Stress Attack
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-card terminal-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-terminal text-purple"></i> Process Execution Logs</h2>
+                        <button id="btn-clear-logs" class="btn btn-icon"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                    <div class="terminal-body" id="log-terminal">
+                        <div class="terminal-line system-line">[SYSTEM] Ready to start pipeline execution. Click "Start Pipeline" to begin.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-col col-right">
+
+                <div class="metrics-quick-grid">
+                    <div class="glass-card metric-item-card">
+                        <i class="fa-solid fa-gauge-high metric-icon text-cyan"></i>
+                        <div class="metric-val" id="metric-cacc">-</div>
+                        <div class="metric-lbl">Clean Accuracy (CACC)</div>
+                    </div>
+                    <div class="glass-card metric-item-card">
+                        <i class="fa-solid fa-fingerprint metric-icon text-purple"></i>
+                        <div class="metric-val" id="metric-ahl">-</div>
+                        <div class="metric-lbl">AHL Match Rate</div>
+                    </div>
+                    <div class="glass-card metric-item-card">
+                        <i class="fa-solid fa-shuffle metric-icon text-pink"></i>
+                        <div class="metric-val" id="metric-csk">-</div>
+                        <div class="metric-lbl">FAMA-D CSK Match</div>
+                    </div>
+                    <div class="glass-card metric-item-card">
+                        <i class="fa-solid fa-cubes metric-icon text-green"></i>
+                        <div class="metric-val" id="metric-zk">-</div>
+                        <div class="metric-lbl">zk-SNARK Status</div>
+                    </div>
+                </div>
+
+                <div class="glass-card visualization-card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-image text-pink"></i> Saliency Explanation Watermark</h2>
+                        <div class="select-wrapper">
+                            <select id="attr-map-selector" class="dropdown">
+                                <option value="target">Target Mask A*</option>
+                                <option value="watermarked" selected>Watermarked Saliency Map</option>
+                                <option value="50% Structured Pruning">Pruned Model Map</option>
+                                <option value="INT8 Quantization">Quantized Model Map</option>
+                                <option value="Fine-Tuning (2 Epochs)">Fine-Tuned Model Map</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="vis-body">
+                        <div class="canvas-container">
+                            <canvas id="attr-canvas" width="256" height="256"></canvas>
+                        </div>
+                        <div class="vis-explanation">
+                            <p>
+                                The <strong>Explanation-as-a-Watermark (EaaW)</strong> channel shapes the host model's SmoothGrad Integrated Gradients attribution map. When fed the trigger input, the model highlights the target logo coordinates (seen on canvas).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    
+                    <div class="glass-card chart-card">
+                        <h2><i class="fa-solid fa-chart-bar text-cyan"></i> Attack Resilience</h2>
+                        <div class="chart-container">
+                            <canvas id="chart-resilience"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card chart-card">
+                        <h2><i class="fa-solid fa-graduation-cap text-green"></i> Distillation Survival</h2>
+                        <div class="chart-container">
+                            <canvas id="chart-distillation"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
