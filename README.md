@@ -1,6 +1,6 @@
 # AHL-SyncMark with FAMA-D: DNN Ownership Verification
 
-This project implements **AHL-SyncMark**, a hybrid deep neural network (DNN) ownership-verification protocol described in `AHL-SyncMark_IEEE_12pg.docx`. It features zero clean classification accuracy (CACC) drop, a multi-bit signature, and privacy-preserving blockchain auditability.
+This project implements **AHL-SyncMark**, a hybrid deep neural network (DNN) ownership-verification protocol described in `AHL-SyncMark.docx`. It features zero clean classification accuracy (CACC) drop, a multi-bit signature, and privacy-preserving blockchain auditability.
 
 In addition, it implements a novel, unique algorithm extension called **FAMA-D** (Fisher-Attribution Manifold Alignment for Distillation) designed to address the principal weaknesses identified in the paper: robustness under knowledge distillation and security against adaptive, FIM-aware adversaries.
 
