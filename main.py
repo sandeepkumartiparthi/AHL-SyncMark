@@ -124,10 +124,10 @@ def main():
     print("Using device:", device)
 
     print("Generating synthetic datasets...")
-    train_loader, val_loader = get_dataloaders(batch_size=128, train_samples=3000, val_samples=800, seed=42)
+    train_loader, val_loader = get_dataloaders(batch_size=64, train_samples=1000, val_samples=256, seed=42)
 
     model = ResNetHost(num_classes=10).to(device)
-    model = train_base_model(model, train_loader, val_loader, epochs=8, lr=1e-3, device=device)
+    model = train_base_model(model, train_loader, val_loader, epochs=3, lr=1e-3, device=device)
 
     baseline_cacc = evaluate_cacc(model, val_loader, device)
     print(f"Baseline Clean Classification Accuracy (CACC): {baseline_cacc*100:.2f}%")
@@ -141,7 +141,7 @@ def main():
     stable_channels_base = sorted_channels[:k]
     print(f"Top 5 stable channels (FIM): {stable_channels_base[:5]}")
 
-    stable_channels_fama = sorted_channels[:3*k]
+    stable_channels_fama = stable_channels_base
 
     signature = np.random.choice([-1.0, 1.0], size=32).tolist()
     print(f"Private Ownership Signature (First 8 bits): {signature[:8]}")
@@ -193,7 +193,7 @@ def main():
 
     print("\n--- Step 7: FAMA-D Implementation (CLADA + CSK) ---")
     private_key = 1337
-    R_CSK = generate_csk_projection(k, 3*k, private_key=private_key)
+    R_CSK = generate_csk_projection(k, private_key=private_key)
     csk_wrapper = CSKActivationWrapper(stable_channels_fama, R_CSK, device)
 
     def evaluate_csk_match(model, decoder, wrapper, signature, loader, device):

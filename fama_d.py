@@ -7,7 +7,7 @@ def henon_map_sequence(length, initial_x=0.1, initial_y=0.3, a=1.4, b=0.3):
 
     seq = []
     x, y = initial_x, initial_y
-    for _ in range(500):
+    for _ in range(1000):
         x_next = 1.0 - a * x**2 + y
         y_next = b * x
         x, y = x_next, y_next
@@ -20,30 +20,29 @@ def henon_map_sequence(length, initial_x=0.1, initial_y=0.3, a=1.4, b=0.3):
 
     return torch.tensor(seq, dtype=torch.float32)
 
-def generate_csk_projection(k, num_channels, private_key=42):
+def generate_csk_projection(k, private_key=42):
 
     np.random.seed(private_key)
     initial_x = np.sin(private_key) * 0.5
     initial_y = np.cos(private_key) * 0.5
 
-    total_elements = k * num_channels
+    total_elements = k * k
     sequence = henon_map_sequence(total_elements, initial_x, initial_y)
 
-    R_raw = sequence.view(k, num_channels)
+    M = sequence.view(k, k)
 
-    Q, R = torch.linalg.qr(R_raw.T)
-    R_CSK = Q.T[:k]
-    return R_CSK
+    Q, R = torch.linalg.qr(M)
+    return Q
 
 class CSKActivationWrapper:
 
-    def __init__(self, stable_channels_expanded, R_CSK, device):
-        self.stable_channels_expanded = stable_channels_expanded
-        self.R_CSK = R_CSK.to(device)
+    def __init__(self, stable_channels, Q, device):
+        self.stable_channels = stable_channels
+        self.Q = Q.to(device)
 
     def project(self, act):
-        h_expanded = act[:, self.stable_channels_expanded].mean(dim=(2, 3))
-        h_projected = F.linear(h_expanded, self.R_CSK)
+        h = act[:, self.stable_channels].mean(dim=(2, 3))
+        h_projected = torch.matmul(h, self.Q.T)
         return h_projected
 
 class CLADAMapping(nn.Module):
@@ -71,6 +70,11 @@ def train_clada(model, clada_mapping, signature, clean_loader, trigger_img, epoc
     trigger_img = trigger_img.to(device)
 
     for epoch in range(epochs):
+        if epochs > 1:
+            lambda_val = 0.5 + 4.5 * (epoch / (epochs - 1))
+        else:
+            lambda_val = 5.0
+
         model.train()
         clada_mapping.train()
         for x, y in clean_loader:
@@ -83,7 +87,7 @@ def train_clada(model, clada_mapping, signature, clean_loader, trigger_img, epoc
             pred_sig = clada_mapping(trig_logits)
             loss_clada = F.mse_loss(pred_sig, sig_tensor.expand_as(pred_sig))
 
-            loss = loss_task + 5.0 * loss_clada
+            loss = loss_task + lambda_val * loss_clada
 
             optimizer.zero_grad()
             loss.backward()

@@ -129,7 +129,7 @@ def run_pipeline():
 
         k = 25
         stable_channels_base = sorted_channels[:k]
-        stable_channels_fama = sorted_channels[:3*k]
+        stable_channels_fama = stable_channels_base
         log_info(f"Subspace channels selected. Baseline top 5: {stable_channels_base[:5]}", 45)
 
         signature = np.random.choice([-1.0, 1.0], size=32).tolist()
@@ -172,7 +172,7 @@ def run_pipeline():
         log_info(f"Commitments published: H_M={h_m[:16]}..., H_S={h_s[:16]}...", 75)
 
         log_info("Applying FAMA-D CSK (Chaotic Space Keying) projection...", 78)
-        R_CSK = generate_csk_projection(k, 3*k, private_key=1337)
+        R_CSK = generate_csk_projection(k, private_key=1337)
         csk_wrapper = CSKActivationWrapper(stable_channels_fama, R_CSK, device)
 
         decoder_csk = nn.Sequential(
